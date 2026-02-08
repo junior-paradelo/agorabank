@@ -1,0 +1,137 @@
+package com.k3ras.agorabank.model;
+
+import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@Entity
+@Table(
+    name = "idempotency_records",
+    uniqueConstraints = {
+        @UniqueConstraint(
+            name = "uk_idempotency_account_scope_key",
+            columnNames = {"account_id", "scope", "key"}
+        )
+    },
+    indexes = {
+        @Index(name = "idx_idempotency_expires_at", columnList = "expires_at"),
+        @Index(name = "idx_idempotency_key", columnList = "key")
+    }
+)
+public class IdempotencyRecord {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(nullable = false)
+    private UUID id;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id", nullable = false, foreignKey = @ForeignKey(name = "fk_idempotency_account"))
+    private Account account;
+    
+    @Column(nullable = false, length = 20)
+    private String scope; // TRANSFER, DEPOSIT, WITHDRAWAL
+    
+    @Column(nullable = false, length = 100)
+    private String key; // Idempotency-Key from header
+    
+    @Column(name = "request_hash", nullable = false, length = 64)
+    private String requestHash;
+    
+    @Column(nullable = false, length = 20)
+    private String status; // IN_PROGRESS, COMPLETED, FAILED
+    
+    @Column(name = "response_code")
+    private Integer responseCode;
+    
+    @Column(name = "response_body", columnDefinition = "TEXT")
+    private String responseBody;
+    
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false, nullable = false)
+    private LocalDateTime createdAt;
+    
+    @Column(name = "expires_at", nullable = false)
+    private LocalDateTime expiresAt;
+    
+    public IdempotencyRecord() {
+    }
+
+    public UUID getId() {
+        return id;
+    }
+    
+    public void setId(UUID id) {
+        this.id = id;
+    }
+    
+    public Account getAccount() {
+        return account;
+    }
+    
+    public void setAccount(Account account) {
+        this.account = account;
+    }
+    
+    public String getScope() {
+        return scope;
+    }
+    
+    public void setScope(String scope) {
+        this.scope = scope;
+    }
+    
+    public String getKey() {
+        return key;
+    }
+    
+    public void setKey(String key) {
+        this.key = key;
+    }
+    
+    public String getRequestHash() {
+        return requestHash;
+    }
+    
+    public void setRequestHash(String requestHash) {
+        this.requestHash = requestHash;
+    }
+    
+    public String getStatus() {
+        return status;
+    }
+    
+    public void setStatus(String status) {
+        this.status = status;
+    }
+    
+    public Integer getResponseCode() {
+        return responseCode;
+    }
+    
+    public void setResponseCode(Integer responseCode) {
+        this.responseCode = responseCode;
+    }
+    
+    public String getResponseBody() {
+        return responseBody;
+    }
+    
+    public void setResponseBody(String responseBody) {
+        this.responseBody = responseBody;
+    }
+    
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+    
+    public LocalDateTime getExpiresAt() {
+        return expiresAt;
+    }
+    
+    public void setExpiresAt(LocalDateTime expiresAt) {
+        this.expiresAt = expiresAt;
+    }
+}
