@@ -1,6 +1,8 @@
 package com.k3ras.agorabank.repository;
 
 import com.k3ras.agorabank.model.Customer;
+import com.k3ras.agorabank.model.enums.CustomerDocumentType;
+import com.k3ras.agorabank.model.enums.CustomerStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -25,8 +27,9 @@ class CustomerRepositoryTest {
         Customer customer = new Customer();
         customer.setEmail("test@example.com");
         customer.setDocumentNumber("12345678");
-        entityManager.persist(customer);
-        entityManager.flush();
+        customer.setDocumentType(CustomerDocumentType.DNI);
+        customer.setStatus(CustomerStatus.ENABLED);
+        entityManager.persistAndFlush(customer);
 
         // when
         Customer found = customerRepository.findByEmail("test@example.com");
@@ -42,8 +45,9 @@ class CustomerRepositoryTest {
         Customer customer = new Customer();
         customer.setEmail("exists@example.com");
         customer.setDocumentNumber("87654321");
-        entityManager.persist(customer);
-        entityManager.flush();
+        customer.setDocumentType(CustomerDocumentType.DNI);
+        customer.setStatus(CustomerStatus.ENABLED);
+        entityManager.persistAndFlush(customer);
 
         // when
         boolean exists = customerRepository.existsByEmail("exists@example.com");
@@ -58,8 +62,9 @@ class CustomerRepositoryTest {
         Customer customer = new Customer();
         customer.setEmail("doc@example.com");
         customer.setDocumentNumber("DOC123456");
-        entityManager.persist(customer);
-        entityManager.flush();
+        customer.setDocumentType(CustomerDocumentType.DNI);
+        customer.setStatus(CustomerStatus.ENABLED);
+        entityManager.persistAndFlush(customer);
 
         // when
         Customer found = customerRepository.findByDocumentNumber("DOC123456");
@@ -75,8 +80,9 @@ class CustomerRepositoryTest {
         Customer customer = new Customer();
         customer.setEmail("exists@example.com");
         customer.setDocumentNumber("87654321");
-        entityManager.persist(customer);
-        entityManager.flush();
+        customer.setDocumentType(CustomerDocumentType.DNI);
+        customer.setStatus(CustomerStatus.ENABLED);
+        entityManager.persistAndFlush(customer);
 
         // when
         boolean exists = customerRepository.existsByDocumentNumber("87654321");

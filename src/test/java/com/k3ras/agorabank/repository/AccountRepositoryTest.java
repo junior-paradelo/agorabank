@@ -3,6 +3,9 @@ package com.k3ras.agorabank.repository;
 
 import com.k3ras.agorabank.model.Account;
 import com.k3ras.agorabank.model.Customer;
+import com.k3ras.agorabank.model.enums.AccountCurrency;
+import com.k3ras.agorabank.model.enums.AccountStatus;
+import com.k3ras.agorabank.model.enums.AccountType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -33,9 +36,9 @@ class AccountRepositoryTest {
 
     private void persistAccount(Customer customer,
                                 String accountNumber,
-                                String status,
-                                String type,
-                                String currency) {
+                                AccountStatus status,
+                                AccountType type,
+                                AccountCurrency currency) {
         Account account = new Account();
         account.setCustomer(customer);
         account.setAccountNumber(accountNumber);
@@ -49,7 +52,7 @@ class AccountRepositoryTest {
     void findByAccountNumber_returnsAccount_whenExists() {
         // given
         Customer customer = persistCustomer("test@example.com", "12345678");
-        persistAccount(customer, "ES00-123", "ACTIVE", "SAVINGS", "EUR");
+        persistAccount(customer, "ES00-123", AccountStatus.ACTIVE, AccountType.SAVINGS, AccountCurrency.EUR);
 
         // when
         Optional<Account> found = accountRepository.findByAccountNumber("ES00-123");
@@ -73,7 +76,7 @@ class AccountRepositoryTest {
     void existsByAccountNumber_returnsTrueFalse() {
         // given
         Customer customer = persistCustomer("test@example.com", "12345678");
-        persistAccount(customer, "ES00-123", "ACTIVE", "SAVINGS", "EUR");
+        persistAccount(customer, "ES00-123", AccountStatus.ACTIVE, AccountType.SAVINGS, AccountCurrency.EUR);
 
         // when-then
         assertThat(accountRepository.existsByAccountNumber("ES00-123")).isTrue();
@@ -86,9 +89,9 @@ class AccountRepositoryTest {
         Customer c1 = persistCustomer("test@example.com", "12345678");
         Customer c2 = persistCustomer("test2@example.com", "87654321");
 
-        persistAccount(c1, "ES00-123", "ACTIVE", "CHECKING", "EUR");
-        persistAccount(c1, "ES00-456", "BLOCKED", "SAVINGS", "EUR");
-        persistAccount(c2, "ES00-789", "ACTIVE", "SAVINGS", "EUR");
+        persistAccount(c1, "ES00-123", AccountStatus.ACTIVE, AccountType.CHECKING, AccountCurrency.EUR);
+        persistAccount(c1, "ES00-456", AccountStatus.BLOCKED, AccountType.SAVINGS, AccountCurrency.EUR);
+        persistAccount(c2, "ES00-789", AccountStatus.ACTIVE, AccountType.SAVINGS, AccountCurrency.EUR);
 
         // when
         List<Account> accounts = accountRepository.findByCustomer(c1);
@@ -104,8 +107,8 @@ class AccountRepositoryTest {
         Customer c1 = persistCustomer("test@example.com", "12345678");
         Customer c2 = persistCustomer("test2@example.com", "87654321");
 
-        persistAccount(c1, "ES00-123", "ACTIVE", "CHECKING", "EUR");
-        persistAccount(c2, "ES00-789", "ACTIVE", "SAVINGS", "EUR");
+        persistAccount(c1, "ES00-123", AccountStatus.ACTIVE, AccountType.CHECKING, AccountCurrency.EUR);
+        persistAccount(c2, "ES00-789", AccountStatus.ACTIVE, AccountType.SAVINGS, AccountCurrency.EUR);
 
         // when
         List<Account> accounts = accountRepository.findByCustomerId(c1.getId());
@@ -119,11 +122,11 @@ class AccountRepositoryTest {
     void findByCustomerIdAndStatus_filtersByStatus() {
         // given
         Customer c1 = persistCustomer("test@example.com", "12345678");
-        persistAccount(c1, "ES00-123", "ACTIVE", "CHECKING", "EUR");
-        persistAccount(c1, "ES00-456", "BLOCKED", "SAVINGS", "EUR");
+        persistAccount(c1, "ES00-123", AccountStatus.ACTIVE, AccountType.CHECKING, AccountCurrency.EUR);
+        persistAccount(c1, "ES00-456", AccountStatus.BLOCKED, AccountType.SAVINGS, AccountCurrency.EUR);
 
         // when
-        List<Account> active = accountRepository.findByCustomerIdAndStatus(c1.getId(), "ACTIVE");
+        List<Account> active = accountRepository.findByCustomerIdAndStatus(c1.getId(), AccountStatus.ACTIVE);
 
         // then
         assertThat(active).hasSize(1);
@@ -134,11 +137,11 @@ class AccountRepositoryTest {
     void findByCustomerIdAndType_filtersByType() {
         // given
         Customer c1 = persistCustomer("test@example.com", "12345678");
-        persistAccount(c1, "ES00-123", "ACTIVE", "CHECKING", "EUR");
-        persistAccount(c1, "ES00-456", "ACTIVE", "SAVINGS", "EUR");
+        persistAccount(c1, "ES00-123", AccountStatus.ACTIVE, AccountType.CHECKING, AccountCurrency.EUR);
+        persistAccount(c1, "ES00-456", AccountStatus.ACTIVE, AccountType.SAVINGS, AccountCurrency.EUR);
 
         // when
-        List<Account> checking = accountRepository.findByCustomerIdAndType(c1.getId(), "CHECKING");
+        List<Account> checking = accountRepository.findByCustomerIdAndType(c1.getId(), AccountType.CHECKING);
 
         // then
         assertThat(checking).hasSize(1);
@@ -149,11 +152,11 @@ class AccountRepositoryTest {
     void findByCustomerIdAndCurrency_filtersByCurrency() {
         // given
         Customer c1 = persistCustomer("test@example.com", "12345678");
-        persistAccount(c1, "ES00-123", "ACTIVE", "CHECKING", "USD");
-        persistAccount(c1, "ES00-456", "ACTIVE", "SAVINGS", "EUR");
+        persistAccount(c1, "ES00-123", AccountStatus.ACTIVE, AccountType.CHECKING, AccountCurrency.USD);
+        persistAccount(c1, "ES00-456", AccountStatus.ACTIVE, AccountType.SAVINGS, AccountCurrency.EUR);
 
         // when
-        List<Account> euroAccounts = accountRepository.findByCustomerIdAndCurrency(c1.getId(), "EUR");
+        List<Account> euroAccounts = accountRepository.findByCustomerIdAndCurrency(c1.getId(), AccountCurrency.EUR);
 
         // then
         assertThat(euroAccounts).hasSize(1);

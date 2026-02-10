@@ -26,9 +26,9 @@ INSERT INTO user_roles (user_id, role_id) VALUES
 -- CUSTOMERS
 -- ============================================
 INSERT INTO customers (email, first_name, last_name, phone_number, document_type, document_number, status, created_at, updated_at) VALUES
-    ('john.doe@example.com', 'John', 'Doe', '+34600123456', 'DNI', '12345678A', 'ACTIVE', NOW(), NOW()),
-    ('bob.smith@example.com', 'Bob', 'Smith', '+34600789012', 'NIE', 'X9876543B', 'ACTIVE', NOW(), NOW()),
-    ('alice.wonder@example.com', 'Alice', 'Wonder', '+34600345678', 'DNI', '87654321C', 'ACTIVE', NOW(), NOW());
+    ('john.doe@example.com', 'John', 'Doe', '+34600123456', 'DNI', '12345678A', 'ENABLED', NOW(), NOW()),
+    ('bob.smith@example.com', 'Bob', 'Smith', '+34600789012', 'NIE', 'X9876543B', 'ENABLED', NOW(), NOW()),
+    ('alice.wonder@example.com', 'Alice', 'Wonder', '+34600345678', 'DNI', '87654321C', 'ENABLED', NOW(), NOW());
 
 -- ============================================
 -- ACCOUNTS
