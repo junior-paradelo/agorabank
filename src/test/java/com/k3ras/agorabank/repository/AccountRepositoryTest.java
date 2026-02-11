@@ -3,9 +3,7 @@ package com.k3ras.agorabank.repository;
 
 import com.k3ras.agorabank.model.Account;
 import com.k3ras.agorabank.model.Customer;
-import com.k3ras.agorabank.model.enums.AccountCurrency;
-import com.k3ras.agorabank.model.enums.AccountStatus;
-import com.k3ras.agorabank.model.enums.AccountType;
+import com.k3ras.agorabank.model.enums.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -30,7 +28,9 @@ class AccountRepositoryTest {
     private Customer persistCustomer(String email, String documentNumber) {
         Customer customer = new Customer();
         customer.setEmail(email);
+        customer.setDocumentType(CustomerDocumentType.DNI);
         customer.setDocumentNumber(documentNumber);
+        customer.setStatus(CustomerStatus.ENABLED);
         return entityManager.persistAndFlush(customer);
     }
 
