@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -85,6 +86,21 @@ class TransactionRepositoryTest {
         transaction.setReference("ADD MONEY");
         transaction.setBalanceAfter(new BigDecimal("1500.00"));
         return entityManager.persistAndFlush(transaction);
+    }
+
+    private void persistTransactionWithoutReturn(Account account, Account counterPartyAccount, String correlationId) {
+        Transaction transaction = new Transaction();
+        transaction.setAccount(account);
+        transaction.setType(TransactionType.DEPOSIT);
+        transaction.setAmount(new BigDecimal("100.00"));
+        transaction.setCurrency(TransactionCurrency.EUR);
+        transaction.setStatus(TransactionStatus.POSTED);
+        transaction.setCorrelationId(correlationId);
+        transaction.setIdempotencyKey(UUID.randomUUID().toString());
+        transaction.setReference("ADD MONEY");
+        transaction.setBalanceAfter(new BigDecimal("1500.00"));
+        transaction.setCounterpartyAccount(counterPartyAccount);
+        entityManager.persistAndFlush(transaction);
     }
 
     @Test
@@ -186,5 +202,119 @@ class TransactionRepositoryTest {
         // then
         assertThat(found).isNotEmpty();
         assertThat(found.getContent().size()).isEqualTo(1);
+    }
+
+    @Test
+    void findByAccountIdAndType_returnsTransactions_whenExists() {
+        // given
+        Customer customer = persistCustomer("test@example.com", "12345678");
+        Account account = persistAccount(customer, "ES00-123", AccountStatus.ACTIVE, AccountType.SAVINGS, AccountCurrency.EUR);
+        persistTransactionWithoutReturn(account, "CORR-X");
+        persistTransactionWithoutReturn(account, "CORR-Y");
+        persistTransactionWithoutReturn(account, "CORR-X");
+        persistTransactionWithoutReturn(account, "CORR-Z");
+
+        // when
+        List<Transaction> found = transactionRepository.findByAccountIdAndType(account.getId(), TransactionType.DEPOSIT);
+
+        // then
+        assertThat(found).isNotEmpty();
+        assertThat(found.size()).isEqualTo(4);
+    }
+
+    @Test
+    void findByAccountIdAndStatus_returnsTransactions_whenExists() {
+        // given
+        Customer customer = persistCustomer("test@example.com", "12345678");
+        Account account = persistAccount(customer, "ES00-123", AccountStatus.ACTIVE, AccountType.SAVINGS, AccountCurrency.EUR);
+        persistTransactionWithoutReturn(account, "CORR-X");
+        persistTransactionWithoutReturn(account, "CORR-Y");
+        persistTransactionWithoutReturn(account, "CORR-X");
+        persistTransactionWithoutReturn(account, "CORR-Z");
+
+        // when
+        List<Transaction> found = transactionRepository.findByAccountIdAndStatus(account.getId(), TransactionStatus.POSTED);
+
+        // then
+        assertThat(found).isNotEmpty();
+        assertThat(found.size()).isEqualTo(4);
+    }
+
+    @Test
+    void findByAccountIdAndStatusPageable_returnsTransactions_whenExists() {
+        // given
+        Customer customer = persistCustomer("test@example.com", "12345678");
+        Account account = persistAccount(customer, "ES00-123", AccountStatus.ACTIVE, AccountType.SAVINGS, AccountCurrency.EUR);
+        persistTransactionWithoutReturn(account, "CORR-X");
+        persistTransactionWithoutReturn(account, "CORR-Y");
+        persistTransactionWithoutReturn(account, "CORR-X");
+        persistTransactionWithoutReturn(account, "CORR-Z");
+
+        // when
+        Pageable pageable = PageRequest.of(0, 3);
+        Page<Transaction> found = transactionRepository.findByAccountIdAndStatus(account.getId(), TransactionStatus.POSTED, pageable);
+
+        // then
+        assertThat(found).isNotEmpty();
+        assertThat(found.getContent().size()).isEqualTo(3);
+    }
+
+    @Test
+    void findByAccountIdAndCreatedAtBetween_returnsTransactions_whenExists() {
+        // given
+        Customer customer = persistCustomer("test@example.com", "12345678");
+        Account account = persistAccount(customer, "ES00-123", AccountStatus.ACTIVE, AccountType.SAVINGS, AccountCurrency.EUR);
+        LocalDateTime startedTime = LocalDateTime.now();
+        persistTransactionWithoutReturn(account, "CORR-X");
+        persistTransactionWithoutReturn(account, "CORR-Y");
+        persistTransactionWithoutReturn(account, "CORR-X");
+        persistTransactionWithoutReturn(account, "CORR-Z");
+
+        // when
+        List<Transaction> found = transactionRepository.findByAccountIdAndCreatedAtBetween(account.getId(), startedTime, LocalDateTime.now().plusDays(1));
+
+        // then
+        assertThat(found).isNotEmpty();
+        assertThat(found.size()).isEqualTo(4);
+    }
+
+    @Test
+    void findByAccountIdAndCreatedAtBetweenPageable_returnsTransactions_whenExists() {
+        // given
+        Customer customer = persistCustomer("test@example.com", "12345678");
+        Account account = persistAccount(customer, "ES00-123", AccountStatus.ACTIVE, AccountType.SAVINGS, AccountCurrency.EUR);
+        LocalDateTime startedTime = LocalDateTime.now();
+        persistTransactionWithoutReturn(account, "CORR-X");
+        persistTransactionWithoutReturn(account, "CORR-Y");
+        persistTransactionWithoutReturn(account, "CORR-X");
+        persistTransactionWithoutReturn(account, "CORR-Z");
+
+        // when
+        Pageable pageable = PageRequest.of(0, 3);
+        Page<Transaction> found = transactionRepository.findByAccountIdAndCreatedAtBetween(account.getId(), startedTime, LocalDateTime.now().plusDays(1), pageable);
+
+        // then
+        assertThat(found).isNotEmpty();
+        assertThat(found.getContent().size()).isEqualTo(3);
+    }
+
+    @Test
+    void findByAccountIdAndCounterpartyAccountId_returnsTransactions_whenExists() {
+        // given
+        Customer customer = persistCustomer("test@example.com", "12345678");
+        Customer customer2 = persistCustomer("test2@example.com", "87654321");
+        Account account = persistAccount(customer, "ES00-123", AccountStatus.ACTIVE, AccountType.SAVINGS, AccountCurrency.EUR);
+        Account counterPartyAccount = persistAccount(customer2, "ES00-456", AccountStatus.ACTIVE, AccountType.SAVINGS, AccountCurrency.EUR);
+        persistTransactionWithoutReturn(account, counterPartyAccount, "CORR-X");
+        persistTransactionWithoutReturn(account, counterPartyAccount, "CORR-Y");
+        persistTransactionWithoutReturn(account, counterPartyAccount, "CORR-X");
+        persistTransactionWithoutReturn(account, counterPartyAccount, "CORR-Z");
+
+        // when
+        List<Transaction> found = transactionRepository.findByAccountIdAndCounterpartyAccountId(account.getId(), counterPartyAccount.getId());
+
+        // then
+        assertThat(found).isNotEmpty();
+        assertThat(found.size()).isEqualTo(4);
     }
 }
