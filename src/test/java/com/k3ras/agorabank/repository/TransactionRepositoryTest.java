@@ -8,6 +8,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
@@ -146,5 +149,42 @@ class TransactionRepositoryTest {
         // then
         assertThat(found).isNotEmpty();
         assertThat(found.size()).isEqualTo(3);
+    }
+
+    @Test
+    void findByAccountId_returnsTransactions_whenExists() {
+        // given
+        Customer customer = persistCustomer("test@example.com", "12345678");
+        Account account = persistAccount(customer, "ES00-123", AccountStatus.ACTIVE, AccountType.SAVINGS, AccountCurrency.EUR);
+        persistTransactionWithoutReturn(account, "CORR-X");
+        persistTransactionWithoutReturn(account, "CORR-Y");
+        persistTransactionWithoutReturn(account, "CORR-X");
+
+        // when
+        List<Transaction> found = transactionRepository.findByAccountId(account.getId());
+        List<Transaction> notFound = transactionRepository.findByAccountId(UUID.randomUUID());
+
+        // then
+        assertThat(found).isNotEmpty();
+        assertThat(found.size()).isEqualTo(3);
+        assertThat(notFound.size()).isEqualTo(0);
+    }
+
+    @Test
+    void findByAccountId_returnsPageableTransactions_whenExists() {
+        // given
+        Customer customer = persistCustomer("test@example.com", "12345678");
+        Account account = persistAccount(customer, "ES00-123", AccountStatus.ACTIVE, AccountType.SAVINGS, AccountCurrency.EUR);
+        persistTransactionWithoutReturn(account, "CORR-X");
+        persistTransactionWithoutReturn(account, "CORR-Y");
+        persistTransactionWithoutReturn(account, "CORR-X");
+
+        // when
+        Pageable pageable = PageRequest.of(1, 2);
+        Page<Transaction> found = transactionRepository.findByAccountId(account.getId(), pageable);
+
+        // then
+        assertThat(found).isNotEmpty();
+        assertThat(found.getContent().size()).isEqualTo(1);
     }
 }
