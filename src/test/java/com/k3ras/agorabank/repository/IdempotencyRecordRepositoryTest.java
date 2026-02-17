@@ -275,4 +275,42 @@ class IdempotencyRecordRepositoryTest {
         // then
         assertThat(results).isEmpty();
     }
+
+    @Test
+    void existsByAccountIdAndScopeAndIdempotencyKeyAndStatus_returnsTrue_whenDuplicateInProgressExists() {
+        // given
+        Customer customer = persistCustomer("dup@example.com", "12121212");
+        Account account = persistAccount(customer, "ES00-DUP", AccountStatus.ACTIVE, AccountType.SAVINGS, AccountCurrency.EUR);
+        IdempotencyRecord record = persistTransaction(account); // scope = TRANSFER, status = IN_PROGRESS
+
+        // when
+        boolean exists = idempotencyRecordRepository.existsByAccountIdAndScopeAndIdempotencyKeyAndStatus(
+                account.getId(),
+                IdempotencyRecordScope.TRANSFER,
+                record.getIdempotencyKey(),
+                IdempotencyRecordStatus.IN_PROGRESS
+        );
+
+        // then
+        assertThat(exists).isTrue();
+    }
+
+    @Test
+    void existsByAccountIdAndScopeAndIdempotencyKeyAndStatus_returnsFalse_whenNoExactMatch() {
+        // given
+        Customer customer = persistCustomer("dup2@example.com", "34343434");
+        Account account = persistAccount(customer, "ES00-DUP2", AccountStatus.ACTIVE, AccountType.SAVINGS, AccountCurrency.EUR);
+        IdempotencyRecord record = persistTransaction(account); // scope = TRANSFER, status = IN_PROGRESS
+
+        // when
+        boolean existsWithDifferentStatus = idempotencyRecordRepository.existsByAccountIdAndScopeAndIdempotencyKeyAndStatus(
+                account.getId(),
+                IdempotencyRecordScope.TRANSFER,
+                record.getIdempotencyKey(),
+                IdempotencyRecordStatus.COMPLETED
+        );
+
+        // then
+        assertThat(existsWithDifferentStatus).isFalse();
+    }
 }
