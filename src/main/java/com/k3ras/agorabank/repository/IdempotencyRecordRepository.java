@@ -18,9 +18,9 @@ import java.util.UUID;
 public interface IdempotencyRecordRepository extends JpaRepository<IdempotencyRecord, UUID> {
 
     // Basic searches
-    Optional<IdempotencyRecord> findByAccountIdAndScopeAndKey(UUID accountId, IdempotencyRecordScope scope, String key);
+    Optional<IdempotencyRecord> findByAccountIdAndScopeAndIdempotencyKey(UUID accountId, IdempotencyRecordScope scope, String idempotencyKey);
 
-    Optional<IdempotencyRecord> findByKey(String key);
+    Optional<IdempotencyRecord> findByIdempotencyKey(String idempotencyKey);
 
     // Operations by account
     List<IdempotencyRecord> findByAccountId(UUID accountId);
@@ -41,5 +41,5 @@ public interface IdempotencyRecordRepository extends JpaRepository<IdempotencyRe
     int deleteExpiredRecords(@Param("now") LocalDateTime now);
 
     // Check for in-progress duplicates
-    boolean existsByAccountIdAndScopeAndKeyAndStatus(UUID accountId, IdempotencyRecordScope scope, String key, IdempotencyRecordStatus status);
+    boolean existsByAccountIdAndScopeAndIdempotencyKeyAndStatus(UUID accountId, IdempotencyRecordScope scope, String idempotencyKey, IdempotencyRecordStatus status);
 }

@@ -14,12 +14,12 @@ import java.util.UUID;
         uniqueConstraints = {
                 @UniqueConstraint(
                         name = "uk_idempotency_account_scope_key",
-                        columnNames = {"account_id", "scope", "key"}
+                        columnNames = {"account_id", "scope", "idempotency_key"}
                 )
         },
         indexes = {
                 @Index(name = "idx_idempotency_expires_at", columnList = "expires_at"),
-                @Index(name = "idx_idempotency_key", columnList = "key")
+                @Index(name = "idx_idempotency_key", columnList = "idempotency_key")
         }
 )
 public class IdempotencyRecord {
@@ -37,7 +37,7 @@ public class IdempotencyRecord {
     private IdempotencyRecordScope scope;
 
     @Column(nullable = false, length = 100)
-    private String key; // Idempotency-Key from header
+    private String idempotencyKey; // Idempotency-Key from header
 
     @Column(name = "request_hash", nullable = false, length = 64)
     private String requestHash;
@@ -85,12 +85,12 @@ public class IdempotencyRecord {
         this.scope = scope;
     }
 
-    public String getKey() {
-        return key;
+    public String getIdempotencyKey() {
+        return idempotencyKey;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public void setIdempotencyKey(String idempotencyKey) {
+        this.idempotencyKey = idempotencyKey;
     }
 
     public String getRequestHash() {
