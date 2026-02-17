@@ -29,12 +29,6 @@ class TransactionRepositoryTest {
     private TestEntityManager entityManager;
 
     @Autowired
-    private CustomerRepository customerRepository;
-
-    @Autowired
-    private AccountRepository accountRepository;
-
-    @Autowired
     private TransactionRepository transactionRepository;
 
     private Customer persistCustomer(String email, String documentNumber) {
