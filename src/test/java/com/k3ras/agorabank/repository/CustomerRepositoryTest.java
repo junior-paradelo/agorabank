@@ -9,6 +9,8 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
@@ -32,11 +34,11 @@ class CustomerRepositoryTest {
         entityManager.persistAndFlush(customer);
 
         // when
-        Customer found = customerRepository.findByEmail("test@example.com");
+        Optional<Customer> found = customerRepository.findByEmail("test@example.com");
 
         // then
-        assertThat(found).isNotNull();
-        assertThat(found.getEmail()).isEqualTo("test@example.com");
+        assertThat(found).isPresent();
+        assertThat(found.get().getEmail()).isEqualTo("test@example.com");
     }
 
     @Test
@@ -67,11 +69,11 @@ class CustomerRepositoryTest {
         entityManager.persistAndFlush(customer);
 
         // when
-        Customer found = customerRepository.findByDocumentNumber("DOC123456");
+        Optional<Customer> found = customerRepository.findByDocumentNumber("DOC123456");
 
         // then
-        assertThat(found).isNotNull();
-        assertThat(found.getDocumentNumber()).isEqualTo("DOC123456");
+        assertThat(found).isPresent();
+        assertThat(found.get().getDocumentNumber()).isEqualTo("DOC123456");
     }
 
     @Test
