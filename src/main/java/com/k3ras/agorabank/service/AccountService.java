@@ -8,6 +8,7 @@ import com.k3ras.agorabank.model.enums.AccountType;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface AccountService {
 
@@ -15,7 +16,7 @@ public interface AccountService {
     Account create(Account account);
 
     // Read
-    Account getById(Long id);
+    Account getById(UUID id);
 
     Optional<Account> findByAccountNumber(String accountNumber);
 
@@ -32,8 +33,8 @@ public interface AccountService {
     List<Account> getByCustomerIdAndCurrency(Long customerId, AccountCurrency currency);
 
     // State management
-    Account changeStatus(Long accountId, AccountStatus newStatus);
+    Account changeStatus(UUID accountId, AccountStatus newStatus);
 
     // Logical close
-    void closeAccount(Long accountId);
+    void closeAccount(UUID accountId);
 }

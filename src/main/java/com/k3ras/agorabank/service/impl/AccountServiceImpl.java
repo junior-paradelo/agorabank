@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -40,7 +41,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional(readOnly = true)
-    public Account getById(Long id) {
+    public Account getById(UUID id) {
         return accountRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Account not found with id: " + id));
     }
@@ -88,7 +89,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Account changeStatus(Long accountId, AccountStatus newStatus) {
+    public Account changeStatus(UUID accountId, AccountStatus newStatus) {
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new IllegalArgumentException("Account not found with id: " + accountId));
         account.setStatus(newStatus);
@@ -96,7 +97,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void closeAccount(Long accountId) {
+    public void closeAccount(UUID accountId) {
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new IllegalArgumentException("Account not found with id: " + accountId));
         account.setStatus(AccountStatus.CLOSED);
