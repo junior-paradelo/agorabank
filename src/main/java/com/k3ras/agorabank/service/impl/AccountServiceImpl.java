@@ -1,5 +1,7 @@
 package com.k3ras.agorabank.service.impl;
 
+import com.k3ras.agorabank.exception.DuplicatedResourceException;
+import com.k3ras.agorabank.exception.ResourceNotFoundException;
 import com.k3ras.agorabank.model.Account;
 import com.k3ras.agorabank.model.Customer;
 import com.k3ras.agorabank.model.enums.AccountCurrency;
@@ -29,7 +31,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Account create(Account account) {
         if (accountRepository.existsByAccountNumber(account.getAccountNumber())) {
-            throw new IllegalArgumentException("Account with this number already exists");
+            throw new DuplicatedResourceException("Account with this number already exists");
         }
 
         if (account.getStatus() == null) {
@@ -43,7 +45,7 @@ public class AccountServiceImpl implements AccountService {
     @Transactional(readOnly = true)
     public Account getById(UUID id) {
         return accountRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Account not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found with id: " + id));
     }
 
     @Override
@@ -91,7 +93,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Account changeStatus(UUID accountId, AccountStatus newStatus) {
         Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new IllegalArgumentException("Account not found with id: " + accountId));
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found with id: " + accountId));
         account.setStatus(newStatus);
         return account;
     }
@@ -99,7 +101,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public void closeAccount(UUID accountId) {
         Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new IllegalArgumentException("Account not found with id: " + accountId));
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found with id: " + accountId));
         account.setStatus(AccountStatus.CLOSED);
     }
 }

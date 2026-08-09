@@ -1,5 +1,7 @@
 package com.k3ras.agorabank.service.impl;
 
+import com.k3ras.agorabank.exception.DuplicatedResourceException;
+import com.k3ras.agorabank.exception.ResourceNotFoundException;
 import com.k3ras.agorabank.model.Customer;
 import com.k3ras.agorabank.model.enums.CustomerStatus;
 import com.k3ras.agorabank.repository.CustomerRepository;
@@ -24,12 +26,12 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Customer create(Customer customer) {
         if (customerRepository.existsByEmail(customer.getEmail())) {
-            throw new IllegalArgumentException("Customer with this email already exists");
+            throw new DuplicatedResourceException("Customer with this email already exists");
         }
 
         if (customer.getDocumentNumber() != null &&
                 customerRepository.existsByDocumentNumber(customer.getDocumentNumber())) {
-            throw new IllegalArgumentException("Customer with this document number already exists");
+            throw new DuplicatedResourceException("Customer with this document number already exists");
         }
 
         return customerRepository.save(customer);
@@ -38,7 +40,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Customer getById(Long id) {
         return customerRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Customer not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + id));
     }
 
     @Override
@@ -54,11 +56,11 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Customer update(Long id, Customer customer) {
         Customer existing = customerRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Customer not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + id));
 
         if (customer.getEmail() != null && !customer.getEmail().equals(existing.getEmail())) {
             if (customerRepository.existsByEmail(customer.getEmail())) {
-                throw new IllegalArgumentException("Customer with this email already exists");
+                throw new DuplicatedResourceException("Customer with this email already exists");
             }
             existing.setEmail(customer.getEmail());
         }
@@ -66,7 +68,7 @@ public class CustomerServiceImpl implements CustomerService {
         if (customer.getDocumentNumber() != null &&
                 !customer.getDocumentNumber().equals(existing.getDocumentNumber())) {
             if (customerRepository.existsByDocumentNumber(customer.getDocumentNumber())) {
-                throw new IllegalArgumentException("Customer with this document number already exists");
+                throw new DuplicatedResourceException("Customer with this document number already exists");
             }
             existing.setDocumentNumber(customer.getDocumentNumber());
         }
@@ -83,7 +85,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void delete(Long id) {
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Customer not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + id));
         customer.setStatus(CustomerStatus.DISABLED);
         customerRepository.save(customer);
     }
